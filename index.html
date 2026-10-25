@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f4d7a">
+<title>Una bottiglia, una storia, una festa</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="stage" class="stage reset" aria-live="polite">
+  <div class="sky"></div>
+  <div class="stars" id="stars"></div>
+  <div class="sea"><i class="wave w1"></i><i class="wave w2"></i><i class="wave w3"></i></div>
+  <div class="sand"></div>
+  <div class="tint"></div>
+  <div class="moon"></div>
+  <div class="glint"></div>
+
+  <div class="bottle-wrap">
+    <svg class="bottle" viewBox="0 0 100 260" role="img" aria-label="Bottiglia di vetro">
+      <defs>
+        <linearGradient id="glass" x1="0" x2="1">
+          <stop offset="0" stop-color="#bfe6ea" stop-opacity=".55"/>
+          <stop offset=".5" stop-color="#e9f8fa" stop-opacity=".25"/>
+          <stop offset="1" stop-color="#8fcdd6" stop-opacity=".55"/>
+        </linearGradient>
+        <linearGradient id="cork" x1="0" x2="1">
+          <stop offset="0" stop-color="#d9aa6a"/><stop offset=".6" stop-color="#b9854a"/><stop offset="1" stop-color="#9a6b38"/>
+        </linearGradient>
+      </defs>
+      <path d="M32 72C32 50 38 42 38 22h24c0 20 6 28 6 50 20 14 24 34 24 64v100c0 14-10 20-22 20H30c-12 0-22-6-22-20V136c0-30 4-50 24-64z" fill="url(#glass)" stroke="#fff" stroke-opacity=".75" stroke-width="2"/>
+      <path d="M10 190h80v45c0 14-10 20-22 20H32c-12 0-22-6-22-20z" fill="#4aa3c7" opacity=".28"/>
+      <g class="roll"><rect x="40" y="105" width="20" height="95" rx="9" fill="#f3e7c8"/><path d="M44 120h12M44 132h12M44 144h12" stroke="#b9a273" stroke-width="1.5"/></g>
+      <path d="M17 130c0-18 4-30 12-38l-1 130c0 8 0 14 4 18-10-2-15-6-15-16z" fill="#fff" opacity=".6"/>
+      <path d="M82 138c0-8-1-14-4-20 6 8 8 20 8 34v60c0 8-2 12-6 14z" fill="#fff" opacity=".35"/>
+      <path d="M41 28v40" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      <rect x="34" y="18" width="32" height="9" rx="4" fill="#d5eef2" fill-opacity=".7" stroke="#fff" stroke-opacity=".8"/>
+      <g class="cork"><rect x="38" y="2" width="24" height="20" rx="4" fill="url(#cork)"/><path d="M44 8h3M53 14h3M46 17h2" stroke="#7d5428" stroke-width="2" stroke-linecap="round"/></g>
+    </svg>
+  </div>
+
+  <div class="paper-wrap"><div class="paper"><p class="t2" id="t2"></p></div></div>
+  <div class="pols" id="pols"></div>
+  <p class="t1" id="t1"></p>
+  <p class="quote" id="quote"></p>
+
+  <div class="wipe" id="wipe"><div class="wipe-body"></div></div>
+
+  <section class="final" id="final" aria-label="Invito">
+    <p class="f-title" id="f-title" style="--d:.2s"></p>
+    <h1 class="f-name" id="f-name" style="--d:.9s"></h1>
+    <p class="f-age" id="f-age" style="--d:1.2s"></p>
+    <p class="f-when" id="f-data" style="--d:1.6s"></p>
+    <p class="f-when" id="f-ora" style="--d:1.9s"></p>
+    <p class="f-place" id="f-locale" style="--d:2.3s"></p>
+    <p class="f-addr" id="f-addr" style="--d:2.6s"></p>
+    <div class="btns" style="--d:3.1s">
+      <a class="btn" id="b-map" target="_blank" rel="noopener" hidden>Come arrivare</a>
+      <a class="btn" id="b-wa" target="_blank" rel="noopener" hidden>Conferma presenza</a>
+      <button class="btn ghost" id="b-replay" type="button">Riguarda la storia</button>
+    </div>
+  </section>
+
+  <div class="ui" id="ui" hidden>
+    <button class="icon" id="b-sound" type="button" aria-label="Attiva o disattiva l’audio" aria-pressed="false" hidden>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg>
+    </button>
+    <button class="skip" id="b-skip" type="button">Vai all’invito</button>
+  </div>
+</main>
+
+<section class="start" id="start">
+  <div class="start-card">
+    <img id="mono" class="mono" alt="" hidden>
+    <h2>Una bottiglia,<br>una storia,<br>una festa</h2>
+    <button class="open" id="b-open" type="button" disabled>Apri il messaggio</button>
+    <p class="hint" id="hint">Sto preparando la storia…</p>
+  </div>
+</section>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
