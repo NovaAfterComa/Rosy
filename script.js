@@ -4,10 +4,11 @@
   const $ = (id) => document.getElementById(id);
   const st = $("stage");
   const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const D = Object.assign({ messaggio: 4.5, bottiglia: 6.5, foto: 7.5, luna: 7, finale: 6 }, C.durate);
+  const D = Object.assign({ messaggio: 4.5, bottiglia: 8, foto: 7.5, luna: 7, finale: 6 }, C.durate);
   const T = Object.assign({}, C.testi);
   let timers = [], music = null, waves = null, muted = false, rampId = 0;
 
+  let begun = false;
   const later = (fn, s) => timers.push(setTimeout(fn, s * 1000));
   const clearAll = () => { timers.forEach(clearTimeout); timers = []; clearInterval(rampId); };
   const fill = (s, v) => String(s || "").replace(/\{(\w+)\}/g, (_, k) => C[k] || "");
@@ -30,6 +31,12 @@
     a.href = "https://wa.me/" + num + "?text=" + encodeURIComponent(fill(C.messaggioConferma));
     a.hidden = false;
   }
+
+  document.querySelectorAll(".mimg").forEach((im) => {
+    if (!C.monogramma) return im.remove();
+    im.setAttribute("href", C.monogramma);
+    im.addEventListener("error", () => im.remove());
+  });
 
   /* ---------- Stelle ---------- */
   const stars = $("stars");
@@ -83,8 +90,7 @@
     mono.onerror = () => { mono.hidden = true; };
     mono.src = C.monogramma;
   }
-  const open = $("b-open"), hint = $("hint");
-  const ready = () => { open.disabled = false; hint.textContent = "Tocca per iniziare"; };
+  const ready = () => { $("bottle").disabled = false; $("b-open").disabled = false; };
   Promise.race([
     Promise.all((C.foto || []).map((f) => loadImg(f.src))),
     new Promise((r) => setTimeout(r, 5000))
@@ -108,6 +114,91 @@
   };
   $("b-sound").addEventListener("click", () => setMuted(!muted));
 
+  /* ---------- Cielo, mare e spiaggia (canvas) ---------- */
+  const cv = $("scene"), cx = cv.getContext("2d");
+  let W = 0, H = 0, nightAt = Infinity, grain = null, last = 0;
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const hash = (k) => { const v = Math.sin(k * 127.1) * 43758.5453; return v - Math.floor(v); };
+  function makeGrain() {
+    const g = document.createElement("canvas"); g.width = g.height = 160;
+    const x = g.getContext("2d"), d = x.createImageData(160, 160);
+    for (let i = 0; i < d.data.length; i += 4) { const v = 150 + Math.random() * 90; d.data[i] = v; d.data[i + 1] = v * 0.9; d.data[i + 2] = v * 0.7; d.data[i + 3] = Math.random() * 95; }
+    x.putImageData(d, 0, 0); grain = cx.createPattern(g, "repeat");
+  }
+  function size() {
+    const r = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight; cv.width = W * r; cv.height = H * r;
+    cx.setTransform(r, 0, 0, r, 0, 0); makeGrain();
+  }
+  function frame(ts) {
+    requestAnimationFrame(frame);
+    if (RM && ts - last < 800) return;
+    last = ts;
+    const t = ts / 1000, n0 = clamp((ts - nightAt) / 3200), N = n0 * n0 * (3 - 2 * n0), day = 1 - N;
+    const hz = H * 0.55, sh = H * 0.87;
+    let g = cx.createLinearGradient(0, 0, 0, hz);
+    g.addColorStop(0, rgb(mix([88, 162, 210], [4, 12, 34], N)));
+    g.addColorStop(0.65, rgb(mix([184, 221, 238], [10, 32, 70], N)));
+    g.addColorStop(1, rgb(mix([248, 234, 206], [24, 60, 100], N)));
+    cx.fillStyle = g; cx.fillRect(0, 0, W, hz + 1);
+    const ys = [0.18, 0.3, 0.12, 0.42, 0.26];
+    for (let k = 0; k < 5; k++) {
+      const x = ((k * 0.31 + t * 0.003 * (1 + k * 0.3)) % 1.5 - 0.25) * W, y = hz * ys[k], r = W * (0.16 + 0.04 * (k % 3));
+      const c = cx.createRadialGradient(x, y, 0, x, y, r);
+      c.addColorStop(0, `rgba(255,255,255,${0.5 * day + 0.06 * N})`); c.addColorStop(1, "rgba(255,255,255,0)");
+      cx.save(); cx.translate(x, y); cx.scale(1, 0.28); cx.translate(-x, -y); cx.fillStyle = c; cx.fillRect(x - r, y - r, 2 * r, 2 * r); cx.restore();
+    }
+    g = cx.createLinearGradient(0, hz, 0, sh);
+    g.addColorStop(0, rgb(mix([150, 206, 226], [14, 42, 78], N)));
+    g.addColorStop(0.5, rgb(mix([52, 141, 178], [8, 28, 58], N)));
+    g.addColorStop(1, rgb(mix([18, 92, 132], [4, 16, 36], N)));
+    cx.fillStyle = g; cx.fillRect(0, hz, W, H - hz);
+    g = cx.createLinearGradient(0, hz - 6, 0, hz + 40);
+    g.addColorStop(0, `rgba(255,250,235,${0.55 * day})`); g.addColorStop(1, "rgba(255,250,235,0)");
+    cx.fillStyle = g; cx.fillRect(0, hz - 6, W, 46);
+    for (let i = 0; i < 34; i++) {
+      const p = i / 33, y0 = hz + 8 + Math.pow(p, 1.7) * (sh - hz - 8), a = 0.6 + p * 5.5, f = 0.012 / (0.35 + p);
+      cx.beginPath();
+      for (let x = 0; x <= W + 12; x += 12) {
+        const y = y0 + a * Math.sin(x * f + t * (0.5 + p * 0.6) + i * 1.7) + a * 0.5 * Math.sin(x * f * 2.3 - t * 0.7 + i);
+        x ? cx.lineTo(x, y) : cx.moveTo(x, y);
+      }
+      cx.strokeStyle = `rgba(${N > 0.5 ? "170,200,235" : "255,255,255"},${(0.07 + 0.2 * p) * (1 - N * 0.6)})`;
+      cx.lineWidth = 0.6 + p * 1.8; cx.stroke();
+    }
+    for (let k = 0; k < 46; k++) {
+      const p = Math.pow(hash(k + 1), 1.5), y = hz + 6 + p * (sh - hz - 20), x = hash(k + 77) * W, s = Math.sin(t * 2 + k * 3.1) * 0.5 + 0.5;
+      cx.fillStyle = `rgba(255,255,255,${0.5 * s * day * (0.3 + p)})`; cx.fillRect(x, y, 3 + p * 14, 1 + p * 1.2);
+    }
+    if (N > 0.01) {
+      const mx = W * (W >= 900 ? 0.62 : 0.68);
+      for (let j = 0; j < 70; j++) {
+        const p = j / 70, y = hz + 4 + p * (sh - hz) * 0.9, w = (8 + p * 70) * (0.6 + 0.4 * Math.sin(t * 2.2 + j * 1.3)), x = mx + Math.sin(t * 1.4 + j * 0.8) * (2 + p * 10);
+        cx.fillStyle = `rgba(236,243,255,${(0.8 - p * 0.7) * N * (0.45 + 0.55 * Math.pow(Math.sin(t * 3 + j * 2.1), 2))})`;
+        cx.fillRect(x - w / 2, y, w, 1.3 + p * 1.6);
+      }
+    }
+    const edge = (x) => sh + 9 * Math.sin(x * 0.011 + t * 0.5) + 5 * Math.sin(x * 0.027 - t * 0.8) + Math.sin(t * 0.4) * 7;
+    cx.beginPath(); cx.moveTo(0, H);
+    for (let x = 0; x <= W + 10; x += 10) cx.lineTo(x, edge(x));
+    cx.lineTo(W, H); cx.closePath();
+    g = cx.createLinearGradient(0, sh, 0, H);
+    g.addColorStop(0, rgb(mix([196, 176, 134], [30, 38, 56], N))); g.addColorStop(0.25, rgb(mix([230, 213, 172], [44, 54, 74], N))); g.addColorStop(1, rgb(mix([240, 226, 190], [52, 62, 82], N)));
+    cx.fillStyle = g; cx.fill();
+    cx.save(); cx.globalAlpha = 0.6 * (1 - N * 0.65); cx.fillStyle = grain; cx.fill(); cx.restore();
+    [[0, 3.5, 0.85 - N * 0.35], [-6, 1.5, 0.45]].forEach(([o, w, al]) => {
+      cx.beginPath();
+      for (let x = 0; x <= W + 10; x += 10) { const y = edge(x) + o; x ? cx.lineTo(x, y) : cx.moveTo(x, y); }
+      cx.strokeStyle = `rgba(255,255,255,${al})`; cx.lineWidth = w; cx.stroke();
+    });
+    g = cx.createRadialGradient(W / 2, H * 0.5, Math.min(W, H) * 0.35, W / 2, H * 0.5, Math.max(W, H) * 0.75);
+    g.addColorStop(0, "rgba(0,10,30,0)"); g.addColorStop(1, `rgba(0,10,30,${0.28 + 0.12 * N})`);
+    cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  }
+  size(); addEventListener("resize", size); requestAnimationFrame(frame);
+
   /* ---------- Sequenza ---------- */
   const wipe = $("wipe");
   const sweep = () => { wipe.classList.remove("go"); void wipe.offsetWidth; wipe.classList.add("go"); };
@@ -116,6 +207,7 @@
   function reset() {
     clearAll();
     wipe.classList.remove("go");
+    nightAt = Infinity;
     st.className = "stage reset";
     reflow();
     st.classList.remove("reset");
@@ -141,7 +233,7 @@
     t += D.bottiglia;
     at(t, () => st.classList.add("s3"));
     t += D.foto;
-    at(t, () => { st.classList.add("s4"); sweep(); ramp(waves, 0.15, 3); });
+    at(t, () => { st.classList.add("s4"); nightAt = performance.now() + (RM ? 0 : 1100); sweep(); ramp(waves, 0.15, 3); });
     t += D.luna;
     at(t, () => {
       sweep();
@@ -153,6 +245,7 @@
   function skipToEnd() {
     clearAll();
     wipe.classList.remove("go");
+    nightAt = -1e9;
     st.classList.add("jump", "s1", "s2", "s3", "s4", "s5");
     reflow();
     st.classList.remove("jump");
@@ -160,12 +253,9 @@
     ramp(waves, 0.1, 2);
   }
 
-  open.addEventListener("click", () => {
-    $("start").classList.add("gone");
-    $("ui").hidden = false;
-    startAudio();
-    run();
-  });
+  const begin = () => { if (begun) return; begun = true; $("ui").hidden = false; startAudio(); run(); };
+  $("bottle").addEventListener("click", begin);
+  $("b-open").addEventListener("click", begin);
   $("b-skip").addEventListener("click", skipToEnd);
   $("b-replay").addEventListener("click", () => {
     if (music) music.volume = 0.55;
@@ -174,7 +264,7 @@
     run();
   });
   document.addEventListener("visibilitychange", () => {
-    const started = $("start").classList.contains("gone");
+    const started = begun;
     [music, waves].forEach((a) => { if (a) { if (document.hidden) a.pause(); else if (started && !muted) play(a); } });
   });
 })();

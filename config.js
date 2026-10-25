@@ -33,7 +33,7 @@ window.INVITO_CONFIG = {
   onde: "",        // es. "assets/onde.mp3" (rumore delle onde, in loop)
 
   // Durate delle scene in secondi
-  durate: { messaggio: 4.5, bottiglia: 6.5, foto: 7.5, luna: 7, finale: 6 },
+  durate: { messaggio: 4.5, bottiglia: 8, foto: 7.5, luna: 7, finale: 6 },
 
   // Testi della storia
   testi: {

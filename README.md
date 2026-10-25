@@ -13,6 +13,12 @@ invito-compleanno/
     └── monogramma.jpg   (opzionale)
 ```
 
+## Come funziona l'avvio
+
+Cielo, mare, spiaggia e luna sono disegnati in tempo reale su canvas; la bottiglia è un SVG con vetro, rifrazioni, liquido, pergamena e tappo di sughero. Tutta la storia parte toccando la bottiglia (c'è anche il pulsante "Apri il messaggio"). Per un risultato davvero fotografico inserisci le tue foto reali: i segnaposto sono grafici.
+
+Il nastro della pergamena porta il monogramma (`monogramma` in `config.js`): si scioglie e cade prima che il foglio si srotoli.
+
 ## 1. Personalizzare
 
 Apri `config.js` e sostituisci i segnaposto tra parentesi quadre:
@@ -23,7 +29,7 @@ Apri `config.js` e sostituisci i segnaposto tra parentesi quadre:
 - `whatsapp`: numero con prefisso, solo cifre (es. `393331234567`). Vuoto = pulsante "Conferma presenza" nascosto
 - `messaggioConferma`: testo precompilato; puoi usare `{nome}`, `{data}`, `{orario}`, `{locale}`
 - `testi`: le frasi della storia
-- `durate`: secondi di ogni scena (messaggio, bottiglia, foto, luna, finale). Totale predefinito circa 31 secondi, per dare il tempo di leggere.
+- `durate`: secondi di ogni scena (messaggio, bottiglia, foto, luna, finale). Totale predefinito circa 33 secondi, per dare il tempo di leggere.
 
 ## 2. Fotografie
 
